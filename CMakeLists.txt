@@ -60,3 +60,6 @@ add_executable(echo
 )
 
 target_link_libraries(echo echo_core)
+
+enable_testing()
+add_subdirectory(tests)
