@@ -5,9 +5,9 @@
 
 #include <string.h>
 
-static const echo_stego_codec_t *echo_codec_for_extension(const char *object_name,
-                                                          const char *extension,
-                                                          const echo_stego_codec_t *codec) {
+static const echo_stego_codec_t *
+echo_codec_for_extension(const char *object_name, const char *extension,
+                         const echo_stego_codec_t *codec) {
   size_t name_len;
   size_t ext_len;
 
@@ -29,19 +29,34 @@ static const echo_stego_codec_t *echo_codec_for_extension(const char *object_nam
   return codec;
 }
 
-const echo_stego_codec_t *echo_stego_codec_for_object_name(
-    const char *object_name
-) {
+const echo_stego_codec_t *
+echo_stego_codec_for_object_name(const char *object_name) {
   const echo_stego_codec_t *codec;
 
   codec = echo_text_carrier_codec();
-  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL, codec);
+  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL,
+                                   codec);
   if (codec) {
     return codec;
   }
 
   codec = echo_image_carrier_codec();
-  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL, codec);
+  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL,
+                                   codec);
+  if (codec) {
+    return codec;
+  }
+
+  codec = echo_image_carrier_lsb_codec();
+  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL,
+                                   codec);
+  if (codec) {
+    return codec;
+  }
+
+  codec = echo_image_carrier_png_codec();
+  codec = echo_codec_for_extension(object_name, codec ? codec->extension : NULL,
+                                   codec);
   if (codec) {
     return codec;
   }

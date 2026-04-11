@@ -24,6 +24,16 @@ static void build_object_name_image(uint32_t index,
   snprintf(out_name, ECHO_OBJECT_NAME_SIZE, "chunk_%06u.ppm", index);
 }
 
+static void build_object_name_image_lsb(uint32_t index,
+                                        char out_name[ECHO_OBJECT_NAME_SIZE]) {
+  snprintf(out_name, ECHO_OBJECT_NAME_SIZE, "chunk_%06u.pnm", index);
+}
+
+static void build_object_name_image_png(uint32_t index,
+                                        char out_name[ECHO_OBJECT_NAME_SIZE]) {
+  snprintf(out_name, ECHO_OBJECT_NAME_SIZE, "chunk_%06u.png", index);
+}
+
 static echo_error_t echo_upload_file_impl(const char *input_path,
                                           const char *manifest_path,
                                           const char *password,
@@ -71,6 +81,12 @@ static echo_error_t echo_upload_file_impl(const char *input_path,
         build_object_name_text((uint32_t)i, manifest.chunks[i].object_name);
       } else if (stego->extension && strcmp(stego->extension, ".ppm") == 0) {
         build_object_name_image((uint32_t)i, manifest.chunks[i].object_name);
+      } else if (stego->extension && strcmp(stego->extension, ".pnm") == 0) {
+        build_object_name_image_lsb((uint32_t)i,
+                                    manifest.chunks[i].object_name);
+      } else if (stego->extension && strcmp(stego->extension, ".png") == 0) {
+        build_object_name_image_png((uint32_t)i,
+                                    manifest.chunks[i].object_name);
       } else {
         build_object_name_text((uint32_t)i, manifest.chunks[i].object_name);
       }
@@ -154,6 +170,34 @@ echo_error_t echo_upload_file_image(const char *input_path,
                                     echo_provider_t *provider) {
   const echo_stego_codec_t *codec =
       echo_stego_codec_for_object_name("chunk_000000.ppm");
+  if (!codec) {
+    return ECHO_ERR_INTERNAL;
+  }
+
+  return echo_upload_file_impl(input_path, manifest_path, password, chunk_size,
+                               provider, codec);
+}
+
+echo_error_t echo_upload_file_image_lsb(const char *input_path,
+                                        const char *manifest_path,
+                                        const char *password, size_t chunk_size,
+                                        echo_provider_t *provider) {
+  const echo_stego_codec_t *codec =
+      echo_stego_codec_for_object_name("chunk_000000.pnm");
+  if (!codec) {
+    return ECHO_ERR_INTERNAL;
+  }
+
+  return echo_upload_file_impl(input_path, manifest_path, password, chunk_size,
+                               provider, codec);
+}
+
+echo_error_t echo_upload_file_image_png(const char *input_path,
+                                        const char *manifest_path,
+                                        const char *password, size_t chunk_size,
+                                        echo_provider_t *provider) {
+  const echo_stego_codec_t *codec =
+      echo_stego_codec_for_object_name("chunk_000000.png");
   if (!codec) {
     return ECHO_ERR_INTERNAL;
   }

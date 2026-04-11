@@ -5,4 +5,8 @@
 
 const echo_stego_codec_t *echo_image_carrier_codec(void);
 
+const echo_stego_codec_t *echo_image_carrier_lsb_codec(void);
+
+const echo_stego_codec_t *echo_image_carrier_png_codec(void);
+
 #endif
