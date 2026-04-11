@@ -1,27 +1,74 @@
+https://github.com/user-attachments/assets/2159fc6d-c31c-4e94-9b25-2f946ee1abc2
+
 # Echo
 
-**Echo** is a modular file chunking, encryption, and reconstruction tool written in **C**.
+**Echo** é uma ferramenta modular de _chunking_, criptografia e reconstrução de arquivos, escrita em **C**.
 
-It is designed as a professional systems programming project focused on:
+O projeto é focado em:
 
-- secure chunk-based file processing
-- authenticated encryption
-- pluggable storage providers
-- deterministic reconstruction
-- testability
-- clean architecture
+- processamento seguro baseado em chunks
+- criptografia autenticada (AEAD) via **libsodium**
+- _storage providers_ plugáveis (ex.: filesystem local)
+- reconstrução determinística via _manifest_
+- testabilidade (unit + integration)
+- arquitetura limpa e modular (core/app/providers/stego)
 
-Echo splits files into chunks, encrypts them, stores them through configurable providers, and later reconstructs the original file using a manifest.
+O Echo divide o arquivo em chunks, cifra cada chunk, armazena usando um provider e depois reconstrói o arquivo original a partir de um manifest.
 
 ## Features
 
-- File chunking with configurable chunk size
-- Authenticated encryption using **libsodium**
-- Manifest-based reconstruction
-- Pluggable storage providers
-- Local filesystem provider implemented
-- Extensible carrier/embedding layer
+- Chunking configurável
+- Hash SHA-256 e criptografia autenticada com **libsodium**
+- Manifest binário (save/load) para reconstrução
+- Provider local filesystem (`provider_localfs`)
+- Camada de _carrier/embedding_ (steganografia) por extensão do objeto:
+  - `.txt` (carrier textual)
+  - `.ppm` (carrier de imagem explícito, PPM)
+  - `.pnm` (carrier de imagem LSB “imperceptível”, PPM/P6)
+  - `.png` (carrier PNG mantendo aparência: adiciona chunk ancilar)
 
-### Make all important parts testable
+## Uso (CLI)
 
-<img width="1150" height="647" alt="image" src="https://github.com/user-attachments/assets/36ab1400-3f1f-4c0e-bbb1-085c608819f3" />
+O binário atual se chama `aaaa` (para evitar conflito com o builtin `echo` do shell).
+
+- Upload (binário “normal”, sem stego):
+  - `./aaaa upload <input> <manifest> <password> <storage_dir> <chunk_size>`
+- Upload com carrier textual:
+  - `./aaaa upload-text <input> <manifest> <password> <storage_dir> <chunk_size>`
+- Upload com carrier de imagem:
+  - `./aaaa upload-image <input> <manifest> <password> <storage_dir> <chunk_size>` (PPM `.ppm`)
+  - `./aaaa upload-image-lsb <input> <manifest> <password> <storage_dir> <chunk_size>` (LSB `.pnm`)
+  - `./aaaa upload-image-png <input> <manifest> <password> <storage_dir> <chunk_size>` (PNG `.png`, mantém aparência)
+- Download:
+  - `./aaaa download <manifest> <output> <password> <storage_dir>`
+- Verify:
+  - `./aaaa verify <manifest> <storage_dir>`
+
+## Build, Test, Install
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Instalação (sem sudo, recomendado):
+
+```bash
+make install
+```
+
+Instalação em `/usr/local` (com sudo):
+
+```bash
+make install-system
+```
+
+## Assets e variáveis de ambiente
+
+- Corpus do carrier textual:
+  - default: `assets/corpus/shrek_pt.txt`
+  - override: `ECHO_STEGO_CORPUS=/path/to/corpus.txt`
+- Cover do carrier PNG:
+  - default: `assets/image.png`
+  - override: `ECHO_STEGO_PNG_COVER=/path/to/cover.png`
