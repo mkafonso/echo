@@ -30,10 +30,17 @@ add_library(echo_core
   source/core/util.c
   source/crypto/crypto.c
   source/stego/stego.c
+  source/stego/text_carrier.c
+  source/stego/image_carrier.c
+  source/stego/corpus_loader.c
   source/providers/provider_localfs.c
   source/app/upload_file.c
   source/app/download_file.c
   source/app/verify_file.c
+)
+
+target_compile_definitions(echo_core PRIVATE
+  ECHO_ASSETS_DIR=\"${CMAKE_SOURCE_DIR}/assets\"
 )
 
 find_package(PkgConfig QUIET)
