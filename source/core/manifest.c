@@ -1,5 +1,6 @@
 #include "echo/manifest.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,6 +47,9 @@ echo_error_t echo_manifest_save(const char *path,
 
   fp = fopen(path, "wb");
   if (!fp) {
+    if (errno == ENOENT) {
+      return ECHO_ERR_NOT_FOUND;
+    }
     return ECHO_ERR_IO;
   }
 
@@ -78,6 +82,9 @@ echo_error_t echo_manifest_load(const char *path,
 
   fp = fopen(path, "rb");
   if (!fp) {
+    if (errno == ENOENT) {
+      return ECHO_ERR_NOT_FOUND;
+    }
     return ECHO_ERR_IO;
   }
 

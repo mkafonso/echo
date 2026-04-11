@@ -1,5 +1,6 @@
 #include "echo/provider_localfs.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +9,45 @@
 typedef struct echo_localfs_ctx {
   char base_dir[1024];
 } echo_localfs_ctx_t;
+
+static echo_error_t localfs_mkdir_p(const char *path) {
+  char tmp[1024];
+  size_t len;
+  char *p;
+
+  if (!path || !*path) {
+    return ECHO_ERR_INVALID_ARG;
+  }
+
+  len = strlen(path);
+  if (len >= sizeof(tmp)) {
+    return ECHO_ERR_IO;
+  }
+
+  memcpy(tmp, path, len + 1);
+
+  if (len > 1 && tmp[len - 1] == '/') {
+    tmp[len - 1] = '\0';
+  }
+
+  for (p = tmp + 1; *p; p++) {
+    if (*p != '/') {
+      continue;
+    }
+
+    *p = '\0';
+    if (mkdir(tmp, 0700) != 0 && errno != EEXIST) {
+      return ECHO_ERR_IO;
+    }
+    *p = '/';
+  }
+
+  if (mkdir(tmp, 0700) != 0 && errno != EEXIST) {
+    return ECHO_ERR_IO;
+  }
+
+  return ECHO_OK;
+}
 
 static echo_error_t localfs_build_path(echo_localfs_ctx_t *ctx,
                                        const char *object_name, char *out_path,
@@ -42,6 +82,14 @@ static echo_error_t localfs_put(void *ctx_void, const char *object_name,
   }
 
   fp = fopen(path, "wb");
+  if (!fp) {
+    if (errno == ENOENT) {
+      if (localfs_mkdir_p(ctx->base_dir) == ECHO_OK) {
+        fp = fopen(path, "wb");
+      }
+    }
+  }
+
   if (!fp) {
     return ECHO_ERR_IO;
   }
@@ -148,6 +196,11 @@ echo_error_t echo_provider_localfs_create(const char *base_dir,
   }
 
   snprintf(ctx->base_dir, sizeof(ctx->base_dir), "%s", base_dir);
+
+  if (localfs_mkdir_p(ctx->base_dir) != ECHO_OK) {
+    free(ctx);
+    return ECHO_ERR_IO;
+  }
 
   out_provider->ctx = ctx;
   out_provider->vtable = &ECHO_LOCALFS_VTABLE;

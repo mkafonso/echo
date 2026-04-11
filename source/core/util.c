@@ -1,6 +1,7 @@
 #include "echo/util.h"
 #include "echo/errors.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,6 +18,9 @@ echo_error_t echo_read_file(const char *path, uint8_t **out_data,
 
   fp = fopen(path, "rb");
   if (!fp) {
+    if (errno == ENOENT) {
+      return ECHO_ERR_NOT_FOUND;
+    }
     return ECHO_ERR_IO;
   }
 
@@ -62,6 +66,9 @@ echo_error_t echo_write_file(const char *path, const uint8_t *data,
 
   fp = fopen(path, "wb");
   if (!fp) {
+    if (errno == ENOENT) {
+      return ECHO_ERR_NOT_FOUND;
+    }
     return ECHO_ERR_IO;
   }
 
