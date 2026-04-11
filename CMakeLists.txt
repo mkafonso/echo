@@ -28,7 +28,7 @@ add_library(echo_core
   source/core/chunker.c
   source/core/manifest.c
   source/core/util.c
-  source/crypto/crypto_stub.c
+  source/crypto/crypto.c
   source/stego/stego.c
   source/providers/provider_localfs.c
   source/app/upload_file.c
