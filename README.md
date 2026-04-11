@@ -64,6 +64,11 @@ Instalação em `/usr/local` (com sudo):
 make install-system
 ```
 
+Make all important parts testable
+
+<img width="1150" height="647" alt="576914368-36ab1400-3f1f-4c0e-bbb1-085c608819f3" src="https://github.com/user-attachments/assets/899435d7-d52c-463e-97e9-d88e1de5e3e3" />
+
+
 ## Assets e variáveis de ambiente
 
 - Corpus do carrier textual:
