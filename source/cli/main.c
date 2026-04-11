@@ -31,14 +31,29 @@ const char *echo_error_str(echo_error_t err) {
   }
 }
 
-static void print_usage(void) {
-  fprintf(
-      stderr,
-      "Usage:\n"
-      "  echo upload <input_file> <manifest_file> <password> <storage_dir> "
-      "<chunk_size>\n"
-      "  echo download <manifest_file> <output_file> <password> <storage_dir>\n"
-      "  echo verify <manifest_file> <storage_dir>\n");
+static void print_usage(const char *prog) {
+  const char *name = (prog && prog[0]) ? prog : "echo";
+
+  fprintf(stderr,
+          "%s\n"
+          "\n"
+          "Usage:\n"
+          "  %s <command> [args]\n"
+          "\n"
+          "Commands:\n"
+          "  upload    <input_file> <manifest_file> <password> <storage_dir> "
+          "<chunk_size>\n"
+          "  download  <manifest_file> <output_file> <password> <storage_dir>\n"
+          "  verify    <manifest_file> <storage_dir>\n"
+          "\n"
+          "Examples:\n"
+          "  %s upload ./arquivo.zip ./manifest.bin minhaSenha ./storage 65536\n"
+          "  %s download ./manifest.bin ./arquivo.out minhaSenha ./storage\n"
+          "  %s verify ./manifest.bin ./storage\n"
+          "\n"
+          "Notes:\n"
+          "  Paths are resolved relative to the current working directory.\n",
+          name, name, name, name, name);
 }
 
 int main(int argc, char **argv) {
@@ -46,7 +61,7 @@ int main(int argc, char **argv) {
   echo_provider_t provider = {0};
 
   if (argc < 2) {
-    print_usage();
+    print_usage(argv[0]);
     return 1;
   }
 
@@ -54,7 +69,7 @@ int main(int argc, char **argv) {
     size_t chunk_size;
 
     if (argc != 7) {
-      print_usage();
+      print_usage(argv[0]);
       return 1;
     }
 
@@ -80,7 +95,7 @@ int main(int argc, char **argv) {
 
   if (strcmp(argv[1], "download") == 0) {
     if (argc != 6) {
-      print_usage();
+      print_usage(argv[0]);
       return 1;
     }
 
@@ -104,7 +119,7 @@ int main(int argc, char **argv) {
 
   if (strcmp(argv[1], "verify") == 0) {
     if (argc != 4) {
-      print_usage();
+      print_usage(argv[0]);
       return 1;
     }
 
@@ -126,6 +141,6 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  print_usage();
+  print_usage(argv[0]);
   return 1;
 }
