@@ -6,7 +6,6 @@ If you discover a security vulnerability in **Echo**, please report it responsib
 
 We take security seriously - especially given the nature of this project — and appreciate your effort to disclose issues properly.
 
-
 ### How to Report
 
 Please **DO NOT** open a public issue.
@@ -22,13 +21,11 @@ Include as much detail as possible:
 - Proof of concept (if applicable)
 - Potential impact
 
-
 ## Response Timeline
 
 - **Initial response:** within 72 hours
 - **Status update:** within 7 days
 - **Fix timeline:** depends on severity and complexity
-
 
 ## Responsible Disclosure
 
@@ -37,7 +34,6 @@ We ask that you:
 - Give us reasonable time to investigate and fix the issue
 - Avoid public disclosure until a fix is available
 - Avoid exploiting the vulnerability beyond what is necessary to demonstrate it
-
 
 ## Scope
 
@@ -52,13 +48,11 @@ Relevant vulnerabilities include (but are not limited to):
 - Reconstruction attacks
 - Platform-specific weaknesses
 
-
 ## Out of Scope
 
 - Issues caused by third-party platforms (e.g., account bans, content removal)
 - Misuse of the tool
 - Violations of platform Terms of Service
-
 
 ## Philosophy
 
