@@ -19,11 +19,17 @@ static void build_object_name_text(uint32_t index,
   snprintf(out_name, ECHO_OBJECT_NAME_SIZE, "chunk_%06u.txt", index);
 }
 
-static echo_error_t echo_upload_file_impl(
-    const char *input_path, const char *manifest_path, const char *password,
-    size_t chunk_size, echo_provider_t *provider,
-    const echo_stego_codec_t *stego
-) {
+static void build_object_name_image(uint32_t index,
+                                    char out_name[ECHO_OBJECT_NAME_SIZE]) {
+  snprintf(out_name, ECHO_OBJECT_NAME_SIZE, "chunk_%06u.ppm", index);
+}
+
+static echo_error_t echo_upload_file_impl(const char *input_path,
+                                          const char *manifest_path,
+                                          const char *password,
+                                          size_t chunk_size,
+                                          echo_provider_t *provider,
+                                          const echo_stego_codec_t *stego) {
   echo_error_t err = ECHO_OK;
   uint8_t *file_data = NULL;
   size_t file_len = 0;
@@ -61,7 +67,13 @@ static echo_error_t echo_upload_file_impl(
 
     manifest.chunks[i].index = (uint32_t)i;
     if (stego) {
-      build_object_name_text((uint32_t)i, manifest.chunks[i].object_name);
+      if (stego->extension && strcmp(stego->extension, ".txt") == 0) {
+        build_object_name_text((uint32_t)i, manifest.chunks[i].object_name);
+      } else if (stego->extension && strcmp(stego->extension, ".ppm") == 0) {
+        build_object_name_image((uint32_t)i, manifest.chunks[i].object_name);
+      } else {
+        build_object_name_text((uint32_t)i, manifest.chunks[i].object_name);
+      }
     } else {
       build_object_name((uint32_t)i, manifest.chunks[i].object_name);
     }
@@ -128,6 +140,20 @@ echo_error_t echo_upload_file_text(const char *input_path,
                                    echo_provider_t *provider) {
   const echo_stego_codec_t *codec =
       echo_stego_codec_for_object_name("chunk_000000.txt");
+  if (!codec) {
+    return ECHO_ERR_INTERNAL;
+  }
+
+  return echo_upload_file_impl(input_path, manifest_path, password, chunk_size,
+                               provider, codec);
+}
+
+echo_error_t echo_upload_file_image(const char *input_path,
+                                    const char *manifest_path,
+                                    const char *password, size_t chunk_size,
+                                    echo_provider_t *provider) {
+  const echo_stego_codec_t *codec =
+      echo_stego_codec_for_object_name("chunk_000000.ppm");
   if (!codec) {
     return ECHO_ERR_INTERNAL;
   }
