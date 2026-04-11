@@ -43,17 +43,20 @@ static void print_usage(const char *prog) {
           "Commands:\n"
           "  upload    <input_file> <manifest_file> <password> <storage_dir> "
           "<chunk_size>\n"
+          "  upload-text  <input_file> <manifest_file> <password> <storage_dir> "
+          "<chunk_size>\n"
           "  download  <manifest_file> <output_file> <password> <storage_dir>\n"
           "  verify    <manifest_file> <storage_dir>\n"
           "\n"
           "Examples:\n"
           "  %s upload ./arquivo.zip ./manifest.bin minhaSenha ./storage 65536\n"
+          "  %s upload-text ./arquivo.zip ./manifest.bin minhaSenha ./storage 65536\n"
           "  %s download ./manifest.bin ./arquivo.out minhaSenha ./storage\n"
           "  %s verify ./manifest.bin ./storage\n"
           "\n"
           "Notes:\n"
           "  Paths are resolved relative to the current working directory.\n",
-          name, name, name, name, name);
+          name, name, name, name, name, name);
 }
 
 int main(int argc, char **argv) {
@@ -82,6 +85,35 @@ int main(int argc, char **argv) {
     }
 
     err = echo_upload_file(argv[2], argv[3], argv[4], chunk_size, &provider);
+    echo_provider_destroy(&provider);
+
+    if (err != ECHO_OK) {
+      fprintf(stderr, "upload error: %s\n", echo_error_str(err));
+      return 1;
+    }
+
+    printf("upload completed successfully\n");
+    return 0;
+  }
+
+  if (strcmp(argv[1], "upload-text") == 0) {
+    size_t chunk_size;
+
+    if (argc != 7) {
+      print_usage(argv[0]);
+      return 1;
+    }
+
+    chunk_size = (size_t)strtoull(argv[6], NULL, 10);
+
+    err = echo_provider_localfs_create(argv[5], &provider);
+    if (err != ECHO_OK) {
+      fprintf(stderr, "provider error: %s\n", echo_error_str(err));
+      return 1;
+    }
+
+    err =
+        echo_upload_file_text(argv[2], argv[3], argv[4], chunk_size, &provider);
     echo_provider_destroy(&provider);
 
     if (err != ECHO_OK) {

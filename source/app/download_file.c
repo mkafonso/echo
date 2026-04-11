@@ -1,6 +1,7 @@
 #include "echo/app.h"
 #include "echo/crypto.h"
 #include "echo/manifest.h"
+#include "echo/stego.h"
 #include "echo/util.h"
 
 #include <stdlib.h>
@@ -32,17 +33,34 @@ echo_error_t echo_download_file(const char *manifest_path,
   for (i = 0; i < manifest.total_chunks; i++) {
     uint8_t *cipher = NULL;
     size_t cipher_len = 0;
+    uint8_t *cipher_bin = NULL;
+    size_t cipher_bin_len = 0;
     uint8_t *plain = NULL;
     size_t plain_len = 0;
+    const echo_stego_codec_t *codec =
+        echo_stego_codec_for_object_name(manifest.chunks[i].object_name);
 
     err = echo_provider_get(provider, manifest.chunks[i].object_name, &cipher,
                             &cipher_len);
     if (err != ECHO_OK)
       goto cleanup;
 
-    err = echo_decrypt_chunk(cipher, cipher_len, password,
+    if (codec) {
+      err = codec->decode(cipher, cipher_len, &cipher_bin, &cipher_bin_len);
+      free(cipher);
+      cipher = NULL;
+      if (err != ECHO_OK) {
+        free(cipher_bin);
+        goto cleanup;
+      }
+    } else {
+      cipher_bin = cipher;
+      cipher_bin_len = cipher_len;
+    }
+
+    err = echo_decrypt_chunk(cipher_bin, cipher_bin_len, password,
                              manifest.chunks[i].nonce, &plain, &plain_len);
-    free(cipher);
+    free(cipher_bin);
     if (err != ECHO_OK) {
       free(plain);
       goto cleanup;
